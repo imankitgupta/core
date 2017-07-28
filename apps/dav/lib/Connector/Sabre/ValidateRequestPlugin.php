@@ -30,7 +30,7 @@ class ValidateRequestPlugin extends ServerPlugin {
 	/**
 	 * Reference to main server object
 	 *
-	 * @var Server
+	 * @var \Sabre\DAV\Server
 	 */
 	private $server;
 
@@ -41,6 +41,17 @@ class ValidateRequestPlugin extends ServerPlugin {
 	 */
 	private $service;
 
+	/**
+	 * This plugin ensures that all request directed to specific
+	 * services (type $service as decided by resolveService($service) in remote.php)
+	 * contain correct headers and their structure is correct
+	 *
+	 * Currently supported:
+	 * 'webdav'
+	 * 'dav'
+	 *
+	 * @var string $service
+	 */
 	public function __construct($service) {
 		$this->service = $service;
 	}
@@ -58,7 +69,7 @@ class ValidateRequestPlugin extends ServerPlugin {
 	 */
 	public function initialize(\Sabre\DAV\Server $server) {
 		$this->server = $server;
-		$this->server->on('beforeMethod', [$this, 'checkValidity'], 1);
+		$this->server->on('beforeMethod:PUT', [$this, 'checkValidityPut'], 1);
 	}
 
 	/**
@@ -68,18 +79,17 @@ class ValidateRequestPlugin extends ServerPlugin {
 	 * @throws ServiceUnavailable
 	 * @return bool
 	 */
-	public function checkValidity() {
+	public function checkValidityPut() {
 		$request = $this->server->httpRequest;
-		$method = $request->getMethod();
 
 		// Verify if optional OC headers are routed in the proper endpoint
-		if ($method === 'PUT'
-			&& $request->hasHeader('OC-Chunk-Offset')
+		if ($request->hasHeader('OC-Chunk-Offset')
 			&& ($this->service != 'dav')) {
+			// Header not allowed in old dav endpoint
 			throw new ServiceUnavailable('Specified OC-Chunk-Offset header is allowed only in dav endpoint');
-		} else if ($method === 'PUT'
-			&& ($request->hasHeader('HTTP_OC_CHUNKED') || $request->hasHeader('Oc-Chunked'))
+		} else if (($request->hasHeader('HTTP_OC_CHUNKED') || $request->hasHeader('Oc-Chunked'))
 			&& ($this->service != 'webdav')) {
+			// Headers not allowed in new dav endpoint
 			throw new ServiceUnavailable('Specified  header (HTTP_OC_CHUNKED/OC-Chunked header) is allowed only in webdav endpoint');
 		}
 

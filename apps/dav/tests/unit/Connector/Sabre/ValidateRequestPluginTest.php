@@ -54,7 +54,7 @@ class ValidateRequestPluginTest extends TestCase {
 		$this->server->httpRequest = new \Sabre\HTTP\Request('PUT', 'http://server/root_url/remote.php/webdav/testchunkold.txt', $headers);
 		$this->plugin->initialize($this->server);
 
-		$this->plugin->checkValidity();
+		$this->plugin->checkValidityPut();
 	}
 
 	/**
@@ -68,7 +68,7 @@ class ValidateRequestPluginTest extends TestCase {
 		$this->server->httpRequest = new \Sabre\HTTP\Request('PUT', 'http://server/root_url/remote.php/dav/files/user/testnew.txt', $headers);
 		$this->plugin->initialize($this->server);
 
-		$this->plugin->checkValidity();
+		$this->plugin->checkValidityPut();
 	}
 
 	/**
@@ -82,7 +82,7 @@ class ValidateRequestPluginTest extends TestCase {
 		$this->server->httpRequest = new \Sabre\HTTP\Request('PUT', 'http://server/root_url/remote.php/dav/files/user/testnew.txt', $headers);
 		$this->plugin->initialize($this->server);
 
-		$this->plugin->checkValidity();
+		$this->plugin->checkValidityPut();
 	}
 
 }

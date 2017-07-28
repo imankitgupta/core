@@ -680,19 +680,6 @@ trait WebDav {
 				}
 			}
 			if ($dav === 'new') {
-				// old chunking style applied to new endpoint 🙈
-				if (!$overwriteMode) {
-					$suffix = '-' . $dav . 'dav-oldchunking';
-				}
-				try {
-					// FIXME: prepending new dav path because the chunking utility functions are messed up
-					$this->userUploadsAFileToWithChunks($user, $source, '/files/' . $user . '/' . ltrim($destination, '/') . $suffix, 'old');
-					$responses[] = $this->response;
-				} catch (ServerException $e) {
-					$responses[] = $e->getResponse();
-				}
-
-				// new chunking style applied to new endpoint
 				if (!$overwriteMode) {
 					$suffix = '-' . $dav . 'dav-newchunking';
 				}
