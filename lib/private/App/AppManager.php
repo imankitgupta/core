@@ -37,6 +37,7 @@ use OCP\App\ManagerEvent;
 use OCP\Files;
 use OCP\IAppConfig;
 use OCP\ICacheFactory;
+use OCP\IConfig;
 use OCP\IGroupManager;
 use OCP\IUser;
 use OCP\IUserSession;
@@ -58,42 +59,40 @@ class AppManager implements IAppManager {
 
 	/** @var \OCP\IUserSession */
 	private $userSession;
-
 	/** @var \OCP\IAppConfig */
 	private $appConfig;
-
 	/** @var \OCP\IGroupManager */
 	private $groupManager;
-
 	/** @var \OCP\ICacheFactory */
 	private $memCacheFactory;
-
 	/** @var string[] $appId => $enabled */
 	private $installedAppsCache;
-
 	/** @var string[] */
 	private $shippedApps;
-
 	/** @var string[] */
 	private $alwaysEnabled;
-
 	/** @var EventDispatcherInterface */
 	private $dispatcher;
+	/** @var IConfig */
+	private $config;
 
 	/**
 	 * @param IUserSession $userSession
 	 * @param IAppConfig $appConfig
+	 * @param IConfig $config
 	 * @param IGroupManager $groupManager
 	 * @param ICacheFactory $memCacheFactory
 	 * @param EventDispatcherInterface $dispatcher
 	 */
 	public function __construct(IUserSession $userSession = null,
 								IAppConfig $appConfig,
+								IConfig $config,
 								IGroupManager $groupManager,
 								ICacheFactory $memCacheFactory,
 								EventDispatcherInterface $dispatcher) {
 		$this->userSession = $userSession;
 		$this->appConfig = $appConfig;
+		$this->config = $config;
 		$this->groupManager = $groupManager;
 		$this->memCacheFactory = $memCacheFactory;
 		$this->dispatcher = $dispatcher;
@@ -429,5 +428,22 @@ class AppManager implements IAppManager {
 		$appInfo = Installer::checkAppsIntegrity($data, $appCodeDir, $path);
 		Files::rmdirr($appCodeDir);
 		return $appInfo;
+	}
+
+	/**
+	 * Indicates if app installation is supported. Usually it is but in certain
+	 * environments it is disallowed because of hardening. In a clustered setup
+	 * apps need to be installed on each cluster node which is out of scope of
+	 * ownCloud itself.
+	 *
+	 * @return bool
+	 * @since 10.0.3
+	 */
+	public function canInstall() {
+		if ($this->config->isSystemConfigReadOnly()) {
+			return false;
+		}
+		$appsFolder = OC_App::getInstallPath();
+		return $appsFolder !== null && is_writable($appsFolder) && is_readable($appsFolder);
 	}
 }

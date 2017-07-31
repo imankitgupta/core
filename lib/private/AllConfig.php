@@ -445,4 +445,15 @@ class AllConfig implements \OCP\IConfig {
 
 		return $userIDs;
 	}
+
+	/**
+	 * In some environments the system config file is readonly. Find out if this
+	 * is the case.
+	 *
+	 * @return boolean
+	 * @since 10.0.3
+	 */
+	public function isSystemReadOnly() {
+		return $this->systemConfig->isReadOnly();
+	}
 }

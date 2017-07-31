@@ -516,6 +516,7 @@ class Server extends ServerContainer implements IServerContainer {
 			return new \OC\App\AppManager(
 				$c->getUserSession(),
 				$c->getAppConfig(),
+				$c->getConfig(),
 				$c->getGroupManager(),
 				$c->getMemCacheFactory(),
 				$c->getEventDispatcher()
